@@ -44,7 +44,6 @@ func (nc nonceCount) String() string {
 	return fmt.Sprintf("%08x", c)
 }
 
-const algorithm = "algorithm"
 const authorization = "Authorization"
 const contentType = "Content-Type"
 const nonce = "nonce"
@@ -53,7 +52,7 @@ const qop = "qop"
 const realm = "realm"
 const wwwAuthenticate = "Www-Authenticate"
 
-var wanted = []string{algorithm, nonce, opaque, qop, realm}
+var wanted = []string{nonce, opaque, qop, realm}
 
 // New makes a DigestRequest instance
 func New(ctx context.Context, username, password string) *DigestRequest {
@@ -137,12 +136,11 @@ func (r *DigestRequest) makeAuthorization(req *http.Request, parts map[string]st
 		ha2,
 	})
 	return fmt.Sprintf(
-		`Digest username="%s", realm="%s", nonce="%s", uri="%s", algorithm=%s, qop=%s, nc=%s, cnonce="%s", response="%s", opaque="%s"`,
+		`Digest username="%s", realm="%s", nonce="%s", uri="%s", qop=%s, nc=%s, cnonce="%s", response="%s", opaque="%s"`,
 		r.username,
 		parts[realm],
 		parts[nonce],
 		req.URL.String(),
-		parts[algorithm],
 		parts[qop],
 		nc,
 		cnonce,
