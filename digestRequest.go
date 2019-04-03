@@ -22,11 +22,34 @@ func ContextWithClient(parent context.Context, client *http.Client) context.Cont
 	return context.WithValue(parent, HTTPClientKey, client)
 }
 
+func TimeoutDialer(cTimeout time.Duration, rwTimeout time.Duration) func(net, addr string) (c net.Conn, err error) {
+	return func(netw, addr string) (net.Conn, error) {
+		conn, err := net.DialTimeout(netw, addr, cTimeout)
+		if err != nil {
+			return nil, err
+		}
+		conn.SetDeadline(time.Now().Add(rwTimeout))
+		return conn, nil
+	}
+}
+
 func clientFromContext(ctx context.Context) *http.Client {
+	// 添加超时时间控制
+	connectTimeout := time.Second * 5
+	readWriteTimeout := time.Millisecond * 2500
+	
+	transport := &http.Transport{
+		Dial: TimeoutDialer(connectTimeout, readWriteTimeout),
+	}
+	
 	if client, ok := ctx.Value(HTTPClientKey).(*http.Client); ok {
+		client.Transport = transport
 		return client
 	}
-	return http.DefaultClient
+	
+	client := http.DefaultClient
+	client.Transport = transport
+	return client
 }
 
 // DigestRequest is a client for digest authentication requests
