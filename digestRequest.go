@@ -3,6 +3,8 @@ package digestRequest
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"time"
+	"net"
 	"fmt"
 	"io"
 	"net/http"
